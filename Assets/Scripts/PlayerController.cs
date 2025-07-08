@@ -10,8 +10,8 @@ public class PlayerController : MonoBehaviour
     // Reference to the InputAction for player movement
     InputAction moveAction;
 
-    // Reference to the Rigidbody component for physics-based movement
-    Rigidbody rb;
+    // Reference to the character controller
+    CharacterController controller;
 
     // Reference to the Camera for player movement direction
     Camera mainCamera;
@@ -21,10 +21,14 @@ public class PlayerController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        controller = GetComponent<CharacterController>();
         mainCamera = Camera.main;
 
         moveAction = InputSystem.actions.FindAction("Player/Move");
+        if (moveAction == null)
+        {
+            Debug.LogError("Move action not found in Input System. Please check your Input Actions setup.");
+        }
 
         Cursor.lockState = CursorLockMode.Locked; // Lock the cursor to the center of the screen
         Cursor.visible = false; // Hide the cursor
@@ -57,13 +61,20 @@ public class PlayerController : MonoBehaviour
     {
         // Get current rotation
         float playerRotationY = transform.rotation.eulerAngles.y;
-        Debug.Log($"Current Player Rotation: {playerRotationY}");
 
         // Get camera rotation
         float cameraRotationY = mainCamera.transform.rotation.eulerAngles.y;
-        Debug.Log($"Current Camera Rotation: {cameraRotationY}");
 
+        float rotationAmount = cameraRotationY - playerRotationY;
+        if (rotationAmount > 180)
+        {
+            rotationAmount -= 360; // Adjust for wrap-around
+        }
+        Debug.Log($"Rotation Amount: {rotationAmount}");
 
+        // Rotate the player towards the camera's direction
+        Quaternion targetRotation = Quaternion.Euler(0, cameraRotationY, 0);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
 
     void movePlayer()
@@ -80,9 +91,7 @@ public class PlayerController : MonoBehaviour
         Vector3 finalDirection = cameraForward * moveDirection.z + cameraRight * moveDirection.x;
         finalDirection.Normalize();
 
-        // Apply the movement to the Rigidbody
-        rb.MovePosition(rb.position + finalDirection * Time.deltaTime * movementSpeed); //
+        // Move the player using the CharacterController
+        controller.Move(finalDirection * movementSpeed * Time.deltaTime);
     }
-
-
 }
