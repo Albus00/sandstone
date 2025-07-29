@@ -65,12 +65,12 @@ public class PlayerController : MonoBehaviour
         // Get camera rotation
         float cameraRotationY = mainCamera.transform.rotation.eulerAngles.y;
 
-        float rotationAmount = cameraRotationY - playerRotationY;
-        if (rotationAmount > 180)
-        {
-            rotationAmount -= 360; // Adjust for wrap-around
-        }
-        Debug.Log($"Rotation Amount: {rotationAmount}");
+        // float rotationAmount = cameraRotationY - playerRotationY;
+        // if (rotationAmount > 180)
+        // {
+        //     rotationAmount -= 360; // Adjust for wrap-around
+        // }
+        // Debug.Log($"Rotation Amount: {rotationAmount}");
 
         // Rotate the player towards the camera's direction
         Quaternion targetRotation = Quaternion.Euler(0, cameraRotationY, 0);
