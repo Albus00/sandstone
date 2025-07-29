@@ -4,11 +4,16 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     // Player stats
-    public float movementSpeed = 5f; // Speed of the player movement
-    public float rotationSpeed = 100f; // Speed of the player rotation
+    public float MovementSpeed = 5f; // Speed of the player movement
+    public float RotationSpeed = 100f; // Speed of the player rotation
+    public float DashSpeed = 20f; // Speed of the player dash
+
+    // Player states
+    [SerializeField] private bool _stateIsDashing = false; // Whether the player is currently dashing
 
     // Reference to the InputAction for player movement
     InputAction moveAction;
+    InputAction dashAction;
 
     // Reference to the character controller
     CharacterController controller;
@@ -18,6 +23,11 @@ public class PlayerController : MonoBehaviour
     Vector3 cameraForward;
     Vector3 cameraRight;
 
+    // Dash storage
+    private Vector3 _dashDirection;
+    private float _dashDuration = 0.2f;
+    private float _dashTimeElapsed = 0f;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -25,10 +35,7 @@ public class PlayerController : MonoBehaviour
         mainCamera = Camera.main;
 
         moveAction = InputSystem.actions.FindAction("Player/Move");
-        if (moveAction == null)
-        {
-            Debug.LogError("Move action not found in Input System. Please check your Input Actions setup.");
-        }
+        dashAction = InputSystem.actions.FindAction("Player/Dash");
 
         Cursor.lockState = CursorLockMode.Locked; // Lock the cursor to the center of the screen
         Cursor.visible = false; // Hide the cursor
@@ -37,13 +44,21 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        getCameraVectors();
+        // Check player state
+        if (_stateIsDashing)
+        {
+            performDash();
+            return;
+        }
+
+        useCameraVectors();
         rotatePlayer();
         movePlayer();
     }
 
-    void getCameraVectors()
+    void useCameraVectors()
     {
+        // TODO: return 'finalDirection'
         // Get the camera's forward and right vectors
         cameraForward = mainCamera.transform.forward;
         cameraRight = mainCamera.transform.right;
@@ -74,7 +89,7 @@ public class PlayerController : MonoBehaviour
 
         // Rotate the player towards the camera's direction
         Quaternion targetRotation = Quaternion.Euler(0, cameraRotationY, 0);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
     }
 
     void movePlayer()
@@ -87,11 +102,48 @@ public class PlayerController : MonoBehaviour
             moveDirection.Normalize();
         }
 
+        // Check if the player wants to dash
+        if (dashAction.triggered)
+        {
+            triggerDash(moveDirection);
+            return; // Skip normal movement if dashing
+        }
+
+
         // Calculate the final movement direction based on camera orientation
         Vector3 finalDirection = cameraForward * moveDirection.z + cameraRight * moveDirection.x;
         finalDirection.Normalize();
 
         // Move the player using the CharacterController
-        controller.Move(finalDirection * movementSpeed * Time.deltaTime);
+        controller.Move(finalDirection * MovementSpeed * Time.deltaTime);
+    }
+
+    void triggerDash(Vector3 moveDirection)
+    {
+        _stateIsDashing = true;
+
+        // Calculate the dash direction based on input
+        _dashDirection = moveDirection;
+
+        // If there's no input, use the camera's forward direction for dashing
+        if (_dashDirection == Vector3.zero)
+        {
+            _dashDirection = cameraForward;
+        }
+    }
+
+    void performDash()
+    {
+        float t = _dashTimeElapsed / _dashDuration;
+        float easedT = EasingFunctions.EaseInOutCirc(t);
+
+        controller.Move(_dashDirection * DashSpeed * Time.deltaTime);
+
+        _dashTimeElapsed += Time.deltaTime;
+        if (_dashTimeElapsed >= _dashDuration)
+        {
+            _stateIsDashing = false; // Reset dashing state
+            _dashTimeElapsed = 0f; // Reset dash time
+        }
     }
 }

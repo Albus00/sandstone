@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 1cc6e6796f833a94f94e6d794ca654c3, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 1348114434}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -93,8 +93,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
-  m_LightingSettings: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 1477e87da8c1a7a5884f8bf96dc15b8b, type: 2}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: ebf084b0d74aef91f87bc15cd6fb4712, type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -142,7 +142,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8508982541233311950, guid: 3408b355bcbf5145c8e5aa93f1c427f1, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.49
+      value: 2.52
       objectReference: {fileID: 0}
     - target: {fileID: 8508982541233311950, guid: 3408b355bcbf5145c8e5aa93f1c427f1, type: 3}
       propertyPath: m_LocalPosition.z
@@ -193,13 +193,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 7405956102054074067, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
+      propertyPath: Damping.x
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7405956102054074067, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
+      propertyPath: Damping.y
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 7485360577218500114, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.40864944
       objectReference: {fileID: 0}
     - target: {fileID: 7485360577218500114, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.49
+      value: 0.52
       objectReference: {fileID: 0}
     - target: {fileID: 7485360577218500114, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
       propertyPath: m_LocalPosition.z
@@ -407,10 +415,10 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.402
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
