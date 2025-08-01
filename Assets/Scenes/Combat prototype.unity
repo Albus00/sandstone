@@ -135,6 +135,7 @@ GameObject:
   - component: {fileID: 641899667}
   - component: {fileID: 641899669}
   - component: {fileID: 641899668}
+  - component: {fileID: 641899670}
   m_Layer: 0
   m_Name: Energy Circle
   m_TagString: Untagged
@@ -180,7 +181,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 917327cdb155a0a809039847e7f80a59, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -210,6 +211,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 641899666}
   m_Mesh: {fileID: -462981019419857548, guid: b52363c32789671d59448aadab1713c0, type: 3}
+--- !u!114 &641899670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641899666}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8f89e644aa7d15185843ec32e5faa4ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &850777207
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -296,11 +309,23 @@ PrefabInstance:
       value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 6206270427981141807, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
+      propertyPath: _dashSpeed
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 6206270427981141807, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
       propertyPath: DashDuration
       value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 6206270427981141807, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
       propertyPath: RotationSpeed
+      value: 150
+      objectReference: {fileID: 0}
+    - target: {fileID: 6206270427981141807, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
+      propertyPath: _dashDuration
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6206270427981141807, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
+      propertyPath: _rotationSpeed
       value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 7405956102054074067, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}

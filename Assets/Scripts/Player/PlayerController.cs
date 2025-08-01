@@ -1,44 +1,63 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    // Player stats
-    public float MovementSpeed = 5f; // Speed of the player movement
-    public float RotationSpeed = 100f; // Speed of the player rotation
-    public float DashSpeed = 20f; // Speed of the player dash
-    public float DashDuration = 0.5f;
+    public static PlayerController Instance { get; private set; }
+    public const float MaxEnergy = 100f;
 
-    // Player states
-    [SerializeField] private bool _stateIsDashing = false; // Whether the player is currently dashing
+    [Header("Movement Settings")]
+    [SerializeField] private float _movementSpeed = 5f;
+    [SerializeField] private float _rotationSpeed = 100f;
+    [SerializeField] private float _dashSpeed = 20f;
+    [SerializeField] private float _energyRegenRate = 10f;
 
-    // Reference to the InputAction for player movement
-    InputAction moveAction;
-    InputAction dashAction;
+    [Header("Dash Settings")]
+    [SerializeField] private float _dashDuration = 0.5f;
+    [SerializeField] private float _dashCooldown = 1f;
+    [SerializeField] private float _dashEnergyCost = 20f;
 
-    // Reference to the character controller
-    CharacterController controller;
+    [Header("Runtime")]
+    [SerializeField] private float _energy = MaxEnergy;
+    [SerializeField] private bool _isDashing = false;
+    private float _dashTimeElapsed;
+    private Vector3 _dashDirection;
 
-    // Reference to the Camera for player movement direction
-    Camera mainCamera;
-
-    // Reference to the player avatar for visual effects
+    // External references
+    private InputAction _moveAction;
+    private InputAction _dashAction;
+    private CharacterController _controller;
+    private Camera _mainCamera;
     private GameObject _playerAvatar;
     private Material _avatarMaterial;
 
+    // Public events
+    public event Action<float> OnEnergyChanged;
 
-    // Dash storage
-    private Vector3 _dashDirection;
-    private float _dashTimeElapsed = 0f;
+    // Public read-only access
+    public float Energy => _energy;
+
+    private void Awake()
+    {
+        // Make sure only one instance exists
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject); // Optional: destroy duplicates
+            return;
+        }
+
+        Instance = this;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        controller = GetComponent<CharacterController>();
-        mainCamera = Camera.main;
+        _controller = GetComponent<CharacterController>();
+        _mainCamera = Camera.main;
 
-        moveAction = InputSystem.actions.FindAction("Player/Move");
-        dashAction = InputSystem.actions.FindAction("Player/Dash");
+        _moveAction = InputSystem.actions.FindAction("Player/Move");
+        _dashAction = InputSystem.actions.FindAction("Player/Dash");
 
         _playerAvatar = transform.Find("Avatar").gameObject;
         _avatarMaterial = _playerAvatar.GetComponent<Renderer>().material;
@@ -50,7 +69,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // Check player state
-        if (_stateIsDashing)
+        if (_isDashing)
         {
             performDash();
             return;
@@ -58,6 +77,7 @@ public class PlayerController : MonoBehaviour
 
         rotatePlayer();
         movePlayer();
+        setEnergy(_energy + _energyRegenRate * Time.deltaTime); // Regenerate energy over time
     }
 
     /// <summary>
@@ -68,8 +88,8 @@ public class PlayerController : MonoBehaviour
     Vector3 useCameraVectors(Vector3 moveDirection)
     {
         // Get the camera's forward and right vectors
-        Vector3 cameraForward = mainCamera.transform.forward;
-        Vector3 cameraRight = mainCamera.transform.right;
+        Vector3 cameraForward = _mainCamera.transform.forward;
+        Vector3 cameraRight = _mainCamera.transform.right;
 
         // Ignore the vertical component of the camera vectors
         cameraForward.y = 0;
@@ -92,17 +112,17 @@ public class PlayerController : MonoBehaviour
         float playerRotationY = transform.rotation.eulerAngles.y;
 
         // Get camera rotation
-        float cameraRotationY = mainCamera.transform.rotation.eulerAngles.y;
+        float cameraRotationY = _mainCamera.transform.rotation.eulerAngles.y;
 
         // Rotate the player towards the camera's direction
         Quaternion targetRotation = Quaternion.Euler(0, cameraRotationY, 0);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, RotationSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
     }
 
     void movePlayer()
     {
         // Get controller input for movement
-        Vector2 moveInput = moveAction.ReadValue<Vector2>();
+        Vector2 moveInput = _moveAction.ReadValue<Vector2>();
         Vector3 moveDirection = new Vector3(moveInput.x, 0, moveInput.y);
         if (moveDirection.magnitude > 1)
         {
@@ -110,37 +130,43 @@ public class PlayerController : MonoBehaviour
         }
 
         // Check if the player wants to dash
-        if (dashAction.triggered)
+        if (_dashAction.triggered)
         {
             triggerDash(moveDirection);
             return; // Skip normal movement if dashing
         }
 
         // Move the player using the CharacterController
-        controller.Move(useCameraVectors(moveDirection) * MovementSpeed * Time.deltaTime);
+        _controller.Move(useCameraVectors(moveDirection) * _movementSpeed * Time.deltaTime);
+    }
+
+    void setEnergy(float amount)
+    {
+        _energy = Mathf.Clamp(amount, 0, MaxEnergy);
+        OnEnergyChanged.Invoke(_energy);
     }
 
     void triggerDash(Vector3 moveDirection)
     {
-        _stateIsDashing = true;
-
-        // Calculate the dash direction based on input
-        _dashDirection = moveDirection;
-
-        // If there's no input, use the camera's forward direction for dashing
-        if (_dashDirection == Vector3.zero)
+        // Check if the player has enough energy to dash
+        if (_energy < _dashEnergyCost)
         {
-            _dashDirection = new Vector3(0, 0, 1); // Forward direction
+            Debug.Log("Not enough energy to dash!");
+            return;
         }
+
+        _isDashing = true;
+        _energy -= _dashEnergyCost;
+        _dashDirection = moveDirection == Vector3.zero ? _mainCamera.transform.forward : moveDirection;
     }
 
     void performDash()
     {
-        float t = _dashTimeElapsed / DashDuration;
+        float t = _dashTimeElapsed / _dashDuration;
         float easedT = EasingFunctions.EaseInOutCirc(t);
 
         // Calculate the dash direction with easing
-        controller.Move(useCameraVectors(_dashDirection) * DashSpeed * Time.deltaTime);
+        _controller.Move(useCameraVectors(_dashDirection) * _dashSpeed * Time.deltaTime);
 
         // // Fade player avatar opacity
         // Color avatarColor = _avatarMaterial.color;
@@ -155,9 +181,9 @@ public class PlayerController : MonoBehaviour
 
         // End the dash after the specified duration
         _dashTimeElapsed += Time.deltaTime;
-        if (_dashTimeElapsed >= DashDuration)
+        if (_dashTimeElapsed >= _dashDuration)
         {
-            _stateIsDashing = false; // Reset dashing state
+            _isDashing = false; // Reset dashing state
             _dashTimeElapsed = 0f; // Reset dash time
             _avatarMaterial.color = new Color(_avatarMaterial.color.r, _avatarMaterial.color.g, _avatarMaterial.color.b, 1f); // Reset opacity
         }

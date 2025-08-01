@@ -2,14 +2,20 @@ using UnityEngine;
 
 public class EnergyCircleController : MonoBehaviour
 {
-    public Material groundCircleMaterial;
-    public Transform playerTransform;
+    [Range(0f, 1f)]
+    private float _maxFillAmount;
+    private Material _groundCircleMaterial;
 
-    void Update()
+    void Start()
     {
-        if (groundCircleMaterial != null && playerTransform != null)
-        {
-            groundCircleMaterial.SetVector("_PlayerPos", playerTransform.position);
-        }
+        PlayerController.Instance.OnEnergyChanged += SetFillAmount;
+        _maxFillAmount = PlayerController.MaxEnergy;
+        _groundCircleMaterial = GetComponent<Renderer>().material;
+    }
+
+    public void SetFillAmount(float amount)
+    {
+        float fillAmount = Mathf.Clamp01(amount / _maxFillAmount);
+        _groundCircleMaterial.SetFloat("_FillAmount", fillAmount);
     }
 }
