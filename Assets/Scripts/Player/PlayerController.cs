@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     public float MovementSpeed = 5f; // Speed of the player movement
     public float RotationSpeed = 100f; // Speed of the player rotation
     public float DashSpeed = 20f; // Speed of the player dash
+    private float DashDuration = 0.5f;
 
     // Player states
     [SerializeField] private bool _stateIsDashing = false; // Whether the player is currently dashing
@@ -25,7 +26,6 @@ public class PlayerController : MonoBehaviour
 
     // Dash storage
     private Vector3 _dashDirection;
-    private float _dashDuration = 0.2f;
     private float _dashTimeElapsed = 0f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -38,7 +38,6 @@ public class PlayerController : MonoBehaviour
         dashAction = InputSystem.actions.FindAction("Player/Dash");
 
         Cursor.lockState = CursorLockMode.Locked; // Lock the cursor to the center of the screen
-        Cursor.visible = false; // Hide the cursor
     }
 
     // Update is called once per frame
@@ -134,13 +133,13 @@ public class PlayerController : MonoBehaviour
 
     void performDash()
     {
-        float t = _dashTimeElapsed / _dashDuration;
+        float t = _dashTimeElapsed / DashDuration;
         float easedT = EasingFunctions.EaseInOutCirc(t);
 
         controller.Move(_dashDirection * DashSpeed * Time.deltaTime);
 
         _dashTimeElapsed += Time.deltaTime;
-        if (_dashTimeElapsed >= _dashDuration)
+        if (_dashTimeElapsed >= DashDuration)
         {
             _stateIsDashing = false; // Reset dashing state
             _dashTimeElapsed = 0f; // Reset dash time
