@@ -5,7 +5,6 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     public static PlayerController Instance { get; private set; }
-    public const float MaxEnergy = 100f;
 
     [Header("Movement Settings")]
     [SerializeField] private float _movementSpeed = 5f;
@@ -15,11 +14,9 @@ public class PlayerController : MonoBehaviour
 
     [Header("Dash Settings")]
     [SerializeField] private float _dashDuration = 0.5f;
-    [SerializeField] private float _dashCooldown = 1f;
     [SerializeField] private float _dashEnergyCost = 20f;
 
     [Header("Runtime")]
-    [SerializeField] private float _energy = MaxEnergy;
     [SerializeField] private bool _isDashing = false;
     private float _dashTimeElapsed;
     private Vector3 _dashDirection;
@@ -27,16 +24,11 @@ public class PlayerController : MonoBehaviour
     // External references
     private InputAction _moveAction;
     private InputAction _dashAction;
+    private PlayerEnergy _playerEnergy;
     private CharacterController _controller;
     private Camera _mainCamera;
     private GameObject _playerAvatar;
     private Material _avatarMaterial;
-
-    // Public events
-    public event Action<float> OnEnergyChanged;
-
-    // Public read-only access
-    public float Energy => _energy;
 
     private void Awake()
     {
@@ -48,6 +40,11 @@ public class PlayerController : MonoBehaviour
         }
 
         Instance = this;
+
+        _playerEnergy = PlayerEnergy.Instance;
+
+        _moveAction = InputSystem.actions.FindAction("Player/Move");
+        _dashAction = InputSystem.actions.FindAction("Player/Dash");
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -56,11 +53,9 @@ public class PlayerController : MonoBehaviour
         _controller = GetComponent<CharacterController>();
         _mainCamera = Camera.main;
 
-        _moveAction = InputSystem.actions.FindAction("Player/Move");
-        _dashAction = InputSystem.actions.FindAction("Player/Dash");
-
         _playerAvatar = transform.Find("Avatar").gameObject;
         _avatarMaterial = _playerAvatar.GetComponent<Renderer>().material;
+
 
         Cursor.lockState = CursorLockMode.Locked; // Lock the cursor to the center of the screen
     }
@@ -77,7 +72,18 @@ public class PlayerController : MonoBehaviour
 
         rotatePlayer();
         movePlayer();
-        setEnergy(_energy + _energyRegenRate * Time.deltaTime); // Regenerate energy over time
+    }
+
+    private void OnEnable()
+    {
+        _moveAction.Enable();
+        _dashAction.Enable();
+    }
+
+    private void OnDisable()
+    {
+        _moveAction.Disable();
+        _dashAction.Disable();
     }
 
     /// <summary>
@@ -140,23 +146,18 @@ public class PlayerController : MonoBehaviour
         _controller.Move(useCameraVectors(moveDirection) * _movementSpeed * Time.deltaTime);
     }
 
-    void setEnergy(float amount)
-    {
-        _energy = Mathf.Clamp(amount, 0, MaxEnergy);
-        OnEnergyChanged.Invoke(_energy);
-    }
-
     void triggerDash(Vector3 moveDirection)
     {
         // Check if the player has enough energy to dash
-        if (_energy < _dashEnergyCost)
+        if (_playerEnergy.Energy < _dashEnergyCost)
         {
             Debug.Log("Not enough energy to dash!");
             return;
         }
 
         _isDashing = true;
-        _energy -= _dashEnergyCost;
+        _playerEnergy.UseEnergy(_dashEnergyCost);
+        Debug.Log($"Main camera forward: {_mainCamera.transform.forward}, Move direction: {moveDirection}");
         _dashDirection = moveDirection == Vector3.zero ? _mainCamera.transform.forward : moveDirection;
     }
 

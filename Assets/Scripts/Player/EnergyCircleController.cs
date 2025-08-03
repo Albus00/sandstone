@@ -8,8 +8,8 @@ public class EnergyCircleController : MonoBehaviour
 
     void Start()
     {
-        PlayerController.Instance.OnEnergyChanged += SetFillAmount;
-        _maxFillAmount = PlayerController.MaxEnergy;
+        PlayerEnergy.Instance.OnEnergyChanged += SetFillAmount;
+        _maxFillAmount = PlayerEnergy.MaxEnergy;
         _groundCircleMaterial = GetComponent<Renderer>().material;
     }
 
