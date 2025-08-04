@@ -10,8 +10,10 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private GameObject _knifePrefab;
 
     [Header("Combat Settings")]
-    [SerializeField] private float _throwSpeed = 10f;
     [SerializeField] private float _throwCost = 10f;
+
+    // Runtime variables
+    private GameObject _currentKnife;
 
     // Input actions
     private InputAction _throwAction;

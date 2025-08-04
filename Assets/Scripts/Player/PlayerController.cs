@@ -10,7 +10,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _movementSpeed = 5f;
     [SerializeField] private float _rotationSpeed = 100f;
     [SerializeField] private float _dashSpeed = 20f;
-    [SerializeField] private float _energyRegenRate = 10f;
 
     [Header("Dash Settings")]
     [SerializeField] private float _dashDuration = 0.5f;
@@ -41,8 +40,6 @@ public class PlayerController : MonoBehaviour
 
         Instance = this;
 
-        _playerEnergy = PlayerEnergy.Instance;
-
         _moveAction = InputSystem.actions.FindAction("Player/Move");
         _dashAction = InputSystem.actions.FindAction("Player/Dash");
     }
@@ -56,6 +53,7 @@ public class PlayerController : MonoBehaviour
         _playerAvatar = transform.Find("Avatar").gameObject;
         _avatarMaterial = _playerAvatar.GetComponent<Renderer>().material;
 
+        _playerEnergy = PlayerEnergy.Instance;
 
         Cursor.lockState = CursorLockMode.Locked; // Lock the cursor to the center of the screen
     }
@@ -157,8 +155,9 @@ public class PlayerController : MonoBehaviour
 
         _isDashing = true;
         _playerEnergy.UseEnergy(_dashEnergyCost);
-        Debug.Log($"Main camera forward: {_mainCamera.transform.forward}, Move direction: {moveDirection}");
-        _dashDirection = moveDirection == Vector3.zero ? _mainCamera.transform.forward : moveDirection;
+
+        // Use the move direction or forward if no input is given
+        _dashDirection = moveDirection == Vector3.zero ? new Vector3(0, 0, 1) : moveDirection;
     }
 
     void performDash()

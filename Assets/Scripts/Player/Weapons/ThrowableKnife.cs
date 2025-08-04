@@ -22,6 +22,19 @@ public class ThrowableKnife : MonoBehaviour
         }
     }
 
+    // void Update()
+    // {
+    //     if (_hasImpacted) return;
+
+    //     RaycastHit hit;
+    //     if (Physics.Raycast(transform.position, transform.forward, out hit, 0.1f))
+    //     {
+    //         if (_rb) _rb.isKinematic = true;
+    //         GetComponent<Collider>().enabled = false;
+    //         _hasImpacted = true;
+    //     }
+    // }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (_hasImpacted) return;
@@ -30,7 +43,6 @@ public class ThrowableKnife : MonoBehaviour
 
         // Instantiate(impactEffect, transform.position, Quaternion.identity);        }
 
-        // TODO: Make it stop faster and stick to the surface
         if (_rb) _rb.isKinematic = true;
         GetComponent<Collider>().enabled = false;
 

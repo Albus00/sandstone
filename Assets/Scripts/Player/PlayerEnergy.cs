@@ -7,9 +7,11 @@ public class PlayerEnergy : MonoBehaviour
     public const float MaxEnergy = 100f;
     [SerializeField] private float _energy = MaxEnergy;
     [SerializeField] private float _energyRegenRate = 10f;
+    [SerializeField] private GameObject _energyCircle;
+    private Material _energyCircleMaterial;
 
     // Public events
-    public event Action<float> OnEnergyChanged;
+    // public event Action<float> OnEnergyChanged;
 
     // Public read-only access
     public float Energy => _energy;
@@ -26,6 +28,11 @@ public class PlayerEnergy : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        _energyCircleMaterial = _energyCircle.GetComponent<Renderer>().material;
+    }
+
     private void Update()
     {
         // Regenerate energy over time
@@ -35,10 +42,16 @@ public class PlayerEnergy : MonoBehaviour
     public void SetEnergy(float amount)
     {
         _energy = Mathf.Clamp(amount, 0, MaxEnergy);
-        OnEnergyChanged.Invoke(_energy);
+        setFillAmount(_energy);
     }
     public void UseEnergy(float amount)
     {
         SetEnergy(_energy - amount);
+    }
+
+    private void setFillAmount(float amount)
+    {
+        float fillAmount = Mathf.Clamp01(amount / MaxEnergy);
+        _energyCircleMaterial.SetFloat("_FillAmount", fillAmount);
     }
 }
