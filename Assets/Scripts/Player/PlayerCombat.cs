@@ -11,12 +11,14 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("Combat Settings")]
     [SerializeField] private float _throwCost = 10f;
+    [SerializeField] private float _teleportCost = 15f;
 
     // Runtime variables
     private GameObject _currentKnife;
 
     // External references
     private CharacterController _controller;
+    private PlayerEnergy _playerEnergy;
 
     // Input actions
     private InputAction _throwAction;
@@ -42,10 +44,7 @@ public class PlayerCombat : MonoBehaviour
     private void Start()
     {
         _controller = GetComponent<CharacterController>();
-        if (_controller == null)
-        {
-            Debug.LogError("CharacterController component is missing on PlayerCombat.");
-        }
+        _playerEnergy = PlayerEnergy.Instance;
 
         if (_knifePrefab == null)
         {
@@ -102,19 +101,25 @@ public class PlayerCombat : MonoBehaviour
 
     private void TeleportToKnife()
     {
-        if (_currentKnife != null)
-        {
-            // Teleport the player to the knife's position
-            _controller.enabled = false; // Disable controller to prevent physics issues
-            transform.position = _currentKnife.transform.position;
-            _controller.enabled = true; // Re-enable controller
-
-            _currentKnife.SetActive(false); // Optionally deactivate the knife after teleporting
-            _currentKnife = null; // Clear the reference
-        }
-        else
+        if (_currentKnife == null)
         {
             Debug.Log("No knife to teleport to.");
+            return;
         }
+
+        if (!_playerEnergy.HasEnoughEnergy(_teleportCost))
+        {
+            Debug.Log("Not enough energy to teleport!");
+            return;
+        }
+
+        // Teleport the player to the knife's position
+        _controller.enabled = false; // Disable controller to prevent physics issues
+        transform.position = _currentKnife.transform.position;
+        _controller.enabled = true; // Re-enable controller
+
+        _currentKnife.SetActive(false); // Optionally deactivate the knife after teleporting
+        _currentKnife = null; // Clear the reference
+
     }
 }

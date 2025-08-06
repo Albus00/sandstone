@@ -53,6 +53,10 @@ public class PlayerEnergy : MonoBehaviour
     {
         SetEnergy(_energy - amount);
     }
+    public bool HasEnoughEnergy(float amount)
+    {
+        return _energy >= amount;
+    }
 
     private void setFillAmount(float amount)
     {

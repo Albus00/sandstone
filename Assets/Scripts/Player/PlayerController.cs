@@ -17,15 +17,15 @@ public class PlayerController : MonoBehaviour
 
     [Header("Runtime")]
     [SerializeField] private bool _isDashing = false;
+    private Vector3 _moveDirection;
     private float _dashTimeElapsed;
     private Vector3 _dashDirection;
 
     // External references
     private PlayerEnergy _playerEnergy;
     private CharacterController _controller;
+    private Animator _animator;
     private Camera _mainCamera;
-    private GameObject _playerAvatar;
-    private Material _avatarMaterial;
 
     // Input actions
     private InputAction _moveAction;
@@ -51,10 +51,8 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         _controller = GetComponent<CharacterController>();
+        _animator = GetComponentInChildren<Animator>();
         _mainCamera = Camera.main;
-
-        _playerAvatar = transform.Find("Avatar").gameObject;
-        _avatarMaterial = _playerAvatar.GetComponent<Renderer>().material;
 
         _playerEnergy = PlayerEnergy.Instance;
 
@@ -71,8 +69,10 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        _moveDirection = useCameraVectors(getMoveDirection());
+
+        animateMovement();
         rotatePlayer();
-        movePlayer();
     }
 
     private void OnEnable()
@@ -131,6 +131,13 @@ public class PlayerController : MonoBehaviour
         return moveDirection;
     }
 
+    void animateMovement()
+    {
+        // Ease in the movement magnitude for smoother acceleration
+        float easedMagnitude = Mathf.SmoothStep(0, 1, _moveDirection.magnitude);
+        _animator.SetFloat("MoveSpeed", easedMagnitude);
+    }
+
     void rotatePlayer()
     {
         // Get current rotation
@@ -144,10 +151,15 @@ public class PlayerController : MonoBehaviour
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
     }
 
-    void movePlayer()
+    /// <summary>
+    /// Moves the player based on the delta position calculated by the Animator.
+    /// This method is called by the RootMotionRelay script to apply root motion.
+    /// </summary>
+    /// <param name="delta">Based on the avatars last position using root motion</param>
+    public void MovePlayer(Vector3 delta)
     {
         // Move the player using the CharacterController
-        _controller.Move(useCameraVectors(getMoveDirection()) * _movementSpeed * Time.deltaTime);
+        _controller.Move(delta);
     }
 
     void triggerDash()
@@ -163,8 +175,7 @@ public class PlayerController : MonoBehaviour
         _playerEnergy.UseEnergy(_dashEnergyCost);
 
         // Use the move direction or forward if no input is given
-        Vector3 moveDirection = getMoveDirection();
-        _dashDirection = moveDirection == Vector3.zero ? new Vector3(0, 0, 1) : moveDirection;
+        _dashDirection = _moveDirection == Vector3.zero ? new Vector3(0, 0, 1) : _moveDirection;
     }
 
     void performDash()
@@ -181,10 +192,10 @@ public class PlayerController : MonoBehaviour
         // _avatarMaterial.color = avatarColor;
 
         // Toggle avatar visibility
-        if (t > 0.1f && t < 0.8f)
-            _playerAvatar.SetActive(false);
-        else
-            _playerAvatar.SetActive(true);
+        // if (t > 0.1f && t < 0.8f)
+        //     _playerAvatar.SetActive(false);
+        // else
+        //     _playerAvatar.SetActive(true);
 
         // End the dash after the specified duration
         _dashTimeElapsed += Time.deltaTime;
@@ -192,7 +203,7 @@ public class PlayerController : MonoBehaviour
         {
             _isDashing = false; // Reset dashing state
             _dashTimeElapsed = 0f; // Reset dash time
-            _avatarMaterial.color = new Color(_avatarMaterial.color.r, _avatarMaterial.color.g, _avatarMaterial.color.b, 1f); // Reset opacity
+            // _avatarMaterial.color = new Color(_avatarMaterial.color.r, _avatarMaterial.color.g, _avatarMaterial.color.b, 1f); // Reset opacity
         }
     }
 }
