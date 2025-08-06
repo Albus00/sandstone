@@ -21,13 +21,16 @@ public class PlayerController : MonoBehaviour
     private Vector3 _dashDirection;
 
     // External references
-    private InputAction _moveAction;
-    private InputAction _dashAction;
     private PlayerEnergy _playerEnergy;
     private CharacterController _controller;
     private Camera _mainCamera;
     private GameObject _playerAvatar;
     private Material _avatarMaterial;
+
+    // Input actions
+    private InputAction _moveAction;
+    private InputAction _dashAction;
+    private System.Action<InputAction.CallbackContext> _onDash;
 
     private void Awake()
     {
@@ -74,12 +77,17 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
+        _onDash = ctx => triggerDash();
+
+        _dashAction.performed += _onDash;
         _moveAction.Enable();
         _dashAction.Enable();
     }
 
     private void OnDisable()
     {
+        _dashAction.performed -= _onDash;
+
         _moveAction.Disable();
         _dashAction.Disable();
     }
@@ -110,6 +118,19 @@ public class PlayerController : MonoBehaviour
         return combinedCameraDirection;
     }
 
+    Vector3 getMoveDirection()
+    {
+        // Get controller input for movement
+        Vector2 moveInput = _moveAction.ReadValue<Vector2>();
+        Vector3 moveDirection = new Vector3(moveInput.x, 0, moveInput.y);
+        if (moveDirection.magnitude > 1)
+        {
+            moveDirection.Normalize();
+        }
+
+        return moveDirection;
+    }
+
     void rotatePlayer()
     {
         // Get current rotation
@@ -125,26 +146,11 @@ public class PlayerController : MonoBehaviour
 
     void movePlayer()
     {
-        // Get controller input for movement
-        Vector2 moveInput = _moveAction.ReadValue<Vector2>();
-        Vector3 moveDirection = new Vector3(moveInput.x, 0, moveInput.y);
-        if (moveDirection.magnitude > 1)
-        {
-            moveDirection.Normalize();
-        }
-
-        // Check if the player wants to dash
-        if (_dashAction.triggered)
-        {
-            triggerDash(moveDirection);
-            return; // Skip normal movement if dashing
-        }
-
         // Move the player using the CharacterController
-        _controller.Move(useCameraVectors(moveDirection) * _movementSpeed * Time.deltaTime);
+        _controller.Move(useCameraVectors(getMoveDirection()) * _movementSpeed * Time.deltaTime);
     }
 
-    void triggerDash(Vector3 moveDirection)
+    void triggerDash()
     {
         // Check if the player has enough energy to dash
         if (_playerEnergy.Energy < _dashEnergyCost)
@@ -157,6 +163,7 @@ public class PlayerController : MonoBehaviour
         _playerEnergy.UseEnergy(_dashEnergyCost);
 
         // Use the move direction or forward if no input is given
+        Vector3 moveDirection = getMoveDirection();
         _dashDirection = moveDirection == Vector3.zero ? new Vector3(0, 0, 1) : moveDirection;
     }
 

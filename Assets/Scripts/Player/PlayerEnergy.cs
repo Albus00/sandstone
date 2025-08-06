@@ -30,6 +30,11 @@ public class PlayerEnergy : MonoBehaviour
 
     private void Start()
     {
+        if (_energyCircle == null)
+        {
+            Debug.LogError("Energy Circle GameObject is not assigned in the inspector.");
+            return;
+        }
         _energyCircleMaterial = _energyCircle.GetComponent<Renderer>().material;
     }
 

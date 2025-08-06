@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7485360577218500114}
   - component: {fileID: 2809090237109154917}
   - component: {fileID: 1250570432294571473}
+  - component: {fileID: 2648419431449578861}
   - component: {fileID: 6206270427981141807}
   - component: {fileID: 507952752156674653}
   m_Layer: 0
@@ -93,6 +94,21 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2648419431449578861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2216488118702427416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0fb20dcf46608d43a09003fa46cfea7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _energy: 100
+  _energyRegenRate: 10
+  _energyCircle: {fileID: 5058726722945854497}
 --- !u!114 &6206270427981141807
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,10 +124,8 @@ MonoBehaviour:
   _movementSpeed: 5
   _rotationSpeed: 150
   _dashSpeed: 30
-  _energyRegenRate: 10
   _dashDuration: 0.2
   _dashEnergyCost: 0
-  _energy: 100
   _isDashing: 0
 --- !u!114 &507952752156674653
 MonoBehaviour:
@@ -125,6 +139,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4971eddea5ce853e28592c03910bc65a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _knifePrefab: {fileID: 7573170985099544139, guid: 50a69f43b01766a28a90c84df88299f5, type: 3}
+  _throwCost: 10
 --- !u!1 &2960626786005908054
 GameObject:
   m_ObjectHideFlags: 0
@@ -223,7 +239,6 @@ GameObject:
   - component: {fileID: 3053924525066389042}
   - component: {fileID: 3464680970820465019}
   - component: {fileID: 6505526863534556507}
-  - component: {fileID: 7572747198381125060}
   m_Layer: 0
   m_Name: Energy Circle
   m_TagString: Untagged
@@ -299,18 +314,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &7572747198381125060
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5058726722945854497}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f89e644aa7d15185843ec32e5faa4ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &5511887545052111885
 GameObject:
   m_ObjectHideFlags: 0

@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &35358121 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5058726722945854497, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
+  m_PrefabInstance: {fileID: 917439156}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &38760140 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2216488118702427416, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
@@ -357,7 +362,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7572747198381125060, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -379,6 +385,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _energy: 100
   _energyRegenRate: 10
+  _energyCircle: {fileID: 35358121}
 --- !u!1 &1000208994
 GameObject:
   m_ObjectHideFlags: 0
