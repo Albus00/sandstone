@@ -8,4 +8,9 @@ public static class EasingFunctions
       ? (1f - Mathf.Sqrt(1f - Mathf.Pow(2f * t, 2f))) / 2f
       : (Mathf.Sqrt(1f - Mathf.Pow(-2f * t + 2f, 2f)) + 1f) / 2f;
   }
+
+  public static float EaseOutCirc(float t)
+  {
+    return Mathf.Sqrt(1f - Mathf.Pow(t - 1f, 2f));
+  }
 }

@@ -10,6 +10,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _movementSpeed = 5f;
     [SerializeField] private float _rotationSpeed = 100f;
     [SerializeField] private float _dashSpeed = 20f;
+    [SerializeField] private float _smoothRotationThreshold = 20f;
+    [SerializeField] private float _movementInterpolationTime = 0.1f; // Time in milliseconds to smooth movement
 
     [Header("Dash Settings")]
     [SerializeField] private float _dashDuration = 0.5f;
@@ -20,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 _moveDirection;
     private float _dashTimeElapsed;
     private Vector3 _dashDirection;
+    private float _currentSpeed;
 
     // External references
     private PlayerEnergy _playerEnergy;
@@ -70,9 +73,7 @@ public class PlayerController : MonoBehaviour
         }
 
         _moveDirection = useCameraVectors(getMoveDirection());
-
         animateMovement();
-        rotatePlayer();
     }
 
     private void OnEnable()
@@ -113,7 +114,6 @@ public class PlayerController : MonoBehaviour
 
         // Calculate the final movement direction based on camera orientation
         Vector3 combinedCameraDirection = cameraForward * moveDirection.z + cameraRight * moveDirection.x;
-        combinedCameraDirection.Normalize();
 
         return combinedCameraDirection;
     }
@@ -133,22 +133,29 @@ public class PlayerController : MonoBehaviour
 
     void animateMovement()
     {
-        // Ease in the movement magnitude for smoother acceleration
-        float easedMagnitude = Mathf.SmoothStep(0, 1, _moveDirection.magnitude);
-        _animator.SetFloat("MoveSpeed", easedMagnitude);
+        if (_moveDirection != Vector3.zero)
+        {
+            rotatePlayer();
+        }
+
+        // Smoothly interpolate movement magnitude for acceleration/deceleration
+        _currentSpeed = Mathf.Lerp(_currentSpeed, _moveDirection.magnitude, Time.deltaTime / _movementInterpolationTime);
+        _animator.SetFloat("MoveSpeed", _currentSpeed);
     }
+
 
     void rotatePlayer()
     {
-        // Get current rotation
+        const float FAST_ROTATION_MULTIPLIER = 4f;
+
         float playerRotationY = transform.rotation.eulerAngles.y;
+        float moveDirectionY = Mathf.Atan2(_moveDirection.x, _moveDirection.z) * Mathf.Rad2Deg;
+        Quaternion targetRotation = Quaternion.Euler(0, moveDirectionY, 0);
 
-        // Get camera rotation
-        float cameraRotationY = _mainCamera.transform.rotation.eulerAngles.y;
+        float angleDifference = Mathf.Abs(Mathf.DeltaAngle(playerRotationY, moveDirectionY));
+        float rotationSpeed = _rotationSpeed * Time.deltaTime * (angleDifference < _smoothRotationThreshold ? 1f : FAST_ROTATION_MULTIPLIER);
 
-        // Rotate the player towards the camera's direction
-        Quaternion targetRotation = Quaternion.Euler(0, cameraRotationY, 0);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed);
     }
 
     /// <summary>
@@ -175,27 +182,17 @@ public class PlayerController : MonoBehaviour
         _playerEnergy.UseEnergy(_dashEnergyCost);
 
         // Use the move direction or forward if no input is given
-        _dashDirection = _moveDirection == Vector3.zero ? new Vector3(0, 0, 1) : _moveDirection;
+        _dashDirection = _moveDirection == Vector3.zero ? useCameraVectors(new Vector3(0, 0, 1)) : _moveDirection;
+        Debug.Log($"Dashing in direction: {_dashDirection}");
     }
 
     void performDash()
     {
         float t = _dashTimeElapsed / _dashDuration;
-        float easedT = EasingFunctions.EaseInOutCirc(t);
+        float easedT = EasingFunctions.EaseOutCirc(t);
 
         // Calculate the dash direction with easing
-        _controller.Move(useCameraVectors(_dashDirection) * _dashSpeed * Time.deltaTime);
-
-        // // Fade player avatar opacity
-        // Color avatarColor = _avatarMaterial.color;
-        // avatarColor.a = Mathf.Sin(Mathf.PI * (t + 1)) + 1;
-        // _avatarMaterial.color = avatarColor;
-
-        // Toggle avatar visibility
-        // if (t > 0.1f && t < 0.8f)
-        //     _playerAvatar.SetActive(false);
-        // else
-        //     _playerAvatar.SetActive(true);
+        _controller.Move(_dashDirection * _dashSpeed * Time.deltaTime);
 
         // End the dash after the specified duration
         _dashTimeElapsed += Time.deltaTime;

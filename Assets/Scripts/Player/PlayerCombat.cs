@@ -118,7 +118,7 @@ public class PlayerCombat : MonoBehaviour
         transform.position = _currentKnife.transform.position;
         _controller.enabled = true; // Re-enable controller
 
-        _currentKnife.SetActive(false); // Optionally deactivate the knife after teleporting
+        _currentKnife.SetActive(false); // Deactivate the knife after teleporting
         _currentKnife = null; // Clear the reference
 
     }

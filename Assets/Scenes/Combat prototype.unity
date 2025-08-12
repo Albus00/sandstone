@@ -340,6 +340,10 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.0031725888
       objectReference: {fileID: 0}
+    - target: {fileID: 6206270427981141807, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
+      propertyPath: _rotationSpeed
+      value: 170
+      objectReference: {fileID: 0}
     - target: {fileID: 7087628050304023513, guid: c019773dce5463fdbb4313cb76a91c14, type: 3}
       propertyPath: TargetOffset.y
       value: -1
